@@ -1,0 +1,531 @@
+{
+  "name": "Assignment-4",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "1f6380a9-65db-47f4-bce3-7ed1fcd05089",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -288,
+        -160
+      ],
+      "id": "fcf9233d-e919-4231-8ffc-f87ecc41c5e0",
+      "name": "Receive Job Search1",
+      "webhookId": "1f6380a9-65db-47f4-bce3-7ed1fcd05089"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a387048c-fecd-4cbb-91f7-16fe186749bf",
+              "name": "jobTitle",
+              "value": "Developer",
+              "type": "string"
+            },
+            {
+              "id": "acd7d9d6-f602-43da-9631-a83579ee2a39",
+              "name": "location",
+              "value": "Dhaka",
+              "type": "string"
+            },
+            {
+              "id": "b406cb5c-3f47-4bff-bb3f-b5400c81fd02",
+              "name": "jobsToFetch",
+              "value": "20",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -64,
+        -160
+      ],
+      "id": "8d939af7-95cc-4e84-a62a-8c2e2d763dd3",
+      "name": "Set Search Parameters"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.apify.com/v2/actors/crawlworks~linkedin-jobs-scraper/runs?token=apify_api_ga8th02Gv3kW14KYy2fKW1Uj89gnb92cVVzG",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"associate\": false,\n  \"contract\": false,\n  \"director\": false,\n  \"enrichCompanyDetails\": false,\n  \"entryLevel\": false,\n  \"executive\": false,\n  \"fullTime\": true,\n  \"hybrid\": false,\n  \"internship\": false,\n  \"internshipLevel\": false,\n  \"jobsToFetch\": {{ $json.jobsToFetch }},\n  \"location\": \"{{ $json.location }}\",\n  \"midSeniorLevel\": false,\n  \"onSite\": false,\n  \"partTime\": false,\n  \"query\": \"{{ $json.jobTitle }}\",\n  \"remote\": true,\n  \"temporary\": false,\n  \"volunteer\": false,\n  \"timePostedRange\": \"\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        176,
+        -336
+      ],
+      "id": "1aab5899-2607-4e3c-abc8-adc284dbbe89",
+      "name": "HTTP - Start Apify LinkedIn Jobs Scraper"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d1b59065-a593-4ba9-8762-31e9304e8a30",
+              "leftValue": "={{ $json.data.status }}",
+              "rightValue": "SUCCEEDED",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        576,
+        -352
+      ],
+      "id": "70d622de-ad1d-4057-af20-494e378ec3b8",
+      "name": "IF - Actor Succeeded?"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apify.com/v2/actor-runs/{{ $('HTTP - Start Apify LinkedIn Jobs Scraper').item.json.data.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer apify_api_fQhp4JCPzelvqreV2HrMQdgBA2T2lu1VQDLk"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        384,
+        -160
+      ],
+      "id": "53b1bacd-aec3-4614-84bc-cb0824ad3f8e",
+      "name": "HTTP - Check Apify Run Status"
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        -64
+      ],
+      "id": "015fb8b3-708c-40e3-b231-e35e04c5d9b8",
+      "name": "Wait",
+      "webhookId": "726e4177-3dbb-4293-8314-0a8922f21315"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apify.com/v2/datasets/{{ $json.data.defaultDatasetId }}/items",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer apify_api_fQhp4JCPzelvqreV2HrMQdgBA2T2lu1VQDLk"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        864,
+        -368
+      ],
+      "id": "98ee3cd8-30bb-4404-829b-930d16d2f7e6",
+      "name": "HTTP - Get Apify Dataset Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "const job = $json;\n\nreturn {\n  json: {\n    jobTitle: job.title || job.jobTitle || job.positionName || '',\n    companyName: job.companyName || job.company || job.companyTitle || '',\n    location: job.location || job.jobLocation || job.locationText || '',\n    postedTime: job.postedTime || job.postedAt || job.timePosted || job.listedAt || '',\n    jobUrl: job.jobUrl || job.url || job.link || job.jobLink || '',\n    companyUrl: job.companyUrl || job.companyLinkedinUrl || job.companyLink || ''\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        -224
+      ],
+      "id": "c93c4e28-2dfa-427f-b09d-6535e59110f7",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1laQmjuZO3-8UPoLjW2P6XiZV0PpIAFTEnmOKAMSC0qU/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1laQmjuZO3-8UPoLjW2P6XiZV0PpIAFTEnmOKAMSC0qU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "Job Title "
+          ],
+          "schema": [
+            {
+              "id": "Job Title ",
+              "displayName": "Job Title ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Name ",
+              "displayName": "Company Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Posted Time ",
+              "displayName": "Posted Time ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job URL",
+              "displayName": "Job URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company URL",
+              "displayName": "Company URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "jobTitle",
+              "displayName": "jobTitle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "companyName",
+              "displayName": "companyName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "postedTime",
+              "displayName": "postedTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "jobUrl",
+              "displayName": "jobUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "companyUrl",
+              "displayName": "companyUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1280,
+        -352
+      ],
+      "id": "a98d064a-97a2-4c7a-840a-8d9899ee16b4",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "HsP0RH7ah4MM9RTk",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=you are a jobfiltering agent, describe the job innformation, Job title: {{ $json.jobTitle }}, Company Name: {{ $json.companyName }}, Location: {{ $json.location }}, Posted time: {{ $json.postedTime }} Job URL:{{ $json.jobUrl }} company URL: {{ $json.companyUrl }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1504,
+        -288
+      ],
+      "id": "9f0353ae-f6ed-4e6c-8cfc-c7717eb149c4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        -16
+      ],
+      "id": "378b5f76-1d70-481e-a944-445861829c89",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "1EjaKaOJF3AIKn2y",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1840,
+        -160
+      ],
+      "id": "0d1d48ce-f239-462d-a375-19a3278d2247",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive Job Search1": {
+      "main": [
+        [
+          {
+            "node": "Set Search Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Search Parameters": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Start Apify LinkedIn Jobs Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Start Apify LinkedIn Jobs Scraper": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Check Apify Run Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Check Apify Run Status": {
+      "main": [
+        [
+          {
+            "node": "IF - Actor Succeeded?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Actor Succeeded?": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Get Apify Dataset Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Check Apify Run Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Get Apify Dataset Items": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "39f9d125-0ea0-4c78-a0d2-648f130b0829",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "2d86684f3eb3f009dfc3a3ddf36d43cd14c65bf72793a2b3cb0033bf7894cbce"
+  },
+  "nodeGroups": [],
+  "id": "VtXVqOlSvEiwF3pV",
+  "tags": []
+}
